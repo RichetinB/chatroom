@@ -1,7 +1,7 @@
 import asyncio
 import aioconsole
 
-IP = "10.1.1.10"
+IP = "185.157.247.84"
 PORT = 13337
 
 async def send_pseudo(writer):
