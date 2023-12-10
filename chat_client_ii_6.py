@@ -1,14 +1,14 @@
 import asyncio
 import aioconsole
 
-IP = "185.157.247.84"
+IP = "10.1.1.10"
 PORT = 13337
 
 async def send_pseudo(writer):
-    pseudo = input("Choose a pseudo: ")
+    pseudo = await aioconsole.ainput("Choose a pseudo: ")
     message = f"Hello|{pseudo}"
     writer.write(message.encode())
-    await writer.drain()  # Modifier ici pour attendre de manière asynchrone
+    await writer.drain()
 
 async def async_input(writer):
     while True:
@@ -20,26 +20,19 @@ async def async_receive(reader):
     while True:
         data = await reader.read(1024)
         if not data:
-            print("Disconnected from the server. Exiting.")
+            print("Server disconnected. Exiting.")
             break
         print(data.decode())
 
 async def main():
     reader, writer = await asyncio.open_connection(host=IP, port=PORT)
 
-    # Send the chosen pseudo to the server
     await send_pseudo(writer)
 
-    # Start the asynchronous tasks
     input_task = asyncio.create_task(async_input(writer))
     receive_task = asyncio.create_task(async_receive(reader))
 
-    # Wait for any of the tasks to complete
-    await asyncio.wait([input_task, receive_task], return_when=asyncio.FIRST_COMPLETED)
-
-    # Close the connection when any of the tasks is done
-    writer.close()
-    await writer.wait_closed()
+    await asyncio.gather(input_task, receive_task)
 
 if __name__ == "__main__":
     asyncio.run(main())
